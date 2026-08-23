@@ -5,6 +5,7 @@ secrets, wall-clock reads, or randomness are permitted in strategy generation.
 """
 
 from .candles import Candle
+from .config import StrategyEngineSettings
 from .models import ExitPlan, ExitReason, SleeveIntent, TradeRecord
 from .provenance import (
     candle_payload,
@@ -46,6 +47,7 @@ __all__ = [
     "PaperStrategyDisabledError",
     "SleeveIntent",
     "StrategyDefinition",
+    "StrategyEngineSettings",
     "StrategyStatus",
     "TradeRecord",
     "UnsupportedExitPlanError",

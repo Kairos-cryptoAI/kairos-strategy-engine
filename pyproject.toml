@@ -4,16 +4,20 @@ build-backend = "hatchling.build"
 
 [project]
 name = "kairos-strategy-engine"
-version = "0.1.0"
-description = "Deterministic strategy generators shared by Kairos research and runtime."
+version = "0.2.0"
+description = "Deterministic strategy generators and their fail-closed runtime consumer."
 readme = "README.md"
 license = { text = "MIT" }
 requires-python = ">=3.11"
 authors = [{ name = "TheLitis" }]
 dependencies = [
     "kairos-core>=0.3,<0.4",
+    "kairos-persistence>=0.1,<0.2",
     "numpy>=1.26,<3",
 ]
+
+[project.scripts]
+kairos-strategy-engine = "kairos_strategy.service:main"
 
 [dependency-groups]
 dev = [
@@ -27,7 +31,8 @@ dev = [
 required-version = "==0.12.3"
 
 [tool.uv.sources]
-kairos-core = { git = "https://github.com/Kairos-cryptoAI/kairos-core.git", rev = "c358e03b1218d5ec953dae3d10a96b32dd35aa4d" }
+kairos-core = { git = "https://github.com/Kairos-cryptoAI/kairos-core.git", rev = "a4f427cdd44184fac62a842320133ac5a3e11fbe" }
+kairos-persistence = { git = "https://github.com/Kairos-cryptoAI/kairos-persistence.git", rev = "ac45e01f3d7debe7ce5ff6855ca91d4199082c61" }
 
 [tool.hatch.build.targets.wheel]
 packages = ["kairos_strategy"]

@@ -1,17 +1,26 @@
 # kairos-strategy-engine
 
 Deterministic strategy source of truth shared by Kairos offline research and
-runtime candidate generation.
+runtime candidate generation. The package also provides the thin
+`kairos-strategy-engine` durable consumer used in deployment.
 
 ## Safety boundary
 
-This package contains only pure transformations from complete, closed market
-bars plus an explicit immutable configuration to ordered strategy candidates.
-It contains no LLM client, exchange client, network calls, environment-secret
+The generator modules contain only pure transformations from complete, closed
+market bars plus an explicit immutable configuration to ordered strategy
+candidates. They contain no LLM client, exchange client, environment-secret
 reads, wall-clock reads, or randomness. The same input bytes and configuration
-therefore produce the same candidate bytes and IDs on Windows and Linux.
-The package owns its minimal closed-bar value and indicator primitives, so it
+therefore produce the same candidate bytes and IDs on Windows and Linux. The
+package owns its minimal closed-bar value and indicator primitives, so research
 does not depend on a collector or runtime service.
+
+The service shell is intentionally separate from those pure modules. It reads
+strict `ClosedBarEventV1` messages through the transactional inbox/outbox,
+restores its bounded bar windows from the immutable PostgreSQL audit log, and
+publishes only strict `StrategyIntentV1` messages. A gap, reorder, or conflicting
+bar blocks that symbol. PAPER requires Redis/PostgreSQL, rejects LIVE authority,
+and defaults to an empty strategy set. Because all existing sleeves are
+`REJECTED`, attempting to enable any of them in PAPER is a startup error.
 
 Every currently registered sleeve is `REJECTED`. Calling
 `generate_sleeve_intents(..., for_paper=True)` fails closed; this repository
