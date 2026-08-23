@@ -464,14 +464,19 @@ version = "0.2.0"
 source = { editable = "." }
 dependencies = [
     { name = "kairos-core" },
-    { name = "kairos-persistence" },
     { name = "numpy", version = "2.4.6", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version < '3.12'" },
     { name = "numpy", version = "2.5.2", source = { registry = "https://pypi.org/simple" }, marker = "python_full_version >= '3.12'" },
+]
+
+[package.optional-dependencies]
+runtime = [
+    { name = "kairos-persistence" },
 ]
 
 [package.dev-dependencies]
 dev = [
     { name = "bandit" },
+    { name = "kairos-persistence" },
     { name = "mypy" },
     { name = "pytest" },
     { name = "ruff" },
@@ -480,13 +485,15 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "kairos-core", git = "https://github.com/Kairos-cryptoAI/kairos-core.git?rev=a4f427cdd44184fac62a842320133ac5a3e11fbe" },
-    { name = "kairos-persistence", git = "https://github.com/Kairos-cryptoAI/kairos-persistence.git?rev=a6fee2115e7dc1aff8389b0a6fe9c7e1fadcdff6" },
+    { name = "kairos-persistence", marker = "extra == 'runtime'", git = "https://github.com/Kairos-cryptoAI/kairos-persistence.git?rev=a6fee2115e7dc1aff8389b0a6fe9c7e1fadcdff6" },
     { name = "numpy", specifier = ">=1.26,<3" },
 ]
+provides-extras = ["runtime"]
 
 [package.metadata.requires-dev]
 dev = [
     { name = "bandit", specifier = ">=1.8,<2" },
+    { name = "kairos-persistence", git = "https://github.com/Kairos-cryptoAI/kairos-persistence.git?rev=a6fee2115e7dc1aff8389b0a6fe9c7e1fadcdff6" },
     { name = "mypy", specifier = ">=1.10,<3" },
     { name = "pytest", specifier = ">=8.0" },
     { name = "ruff", specifier = ">=0.16,<0.17" },

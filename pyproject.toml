@@ -12,9 +12,11 @@ requires-python = ">=3.11"
 authors = [{ name = "TheLitis" }]
 dependencies = [
     "kairos-core>=0.3,<0.4",
-    "kairos-persistence>=0.1,<0.2",
     "numpy>=1.26,<3",
 ]
+
+[project.optional-dependencies]
+runtime = ["kairos-persistence>=0.1,<0.2"]
 
 [project.scripts]
 kairos-strategy-engine = "kairos_strategy.service:main"
@@ -25,6 +27,7 @@ dev = [
     "mypy>=1.10,<3",
     "pytest>=8.0",
     "ruff>=0.16,<0.17",
+    "kairos-persistence>=0.1,<0.2",
 ]
 
 [tool.uv]

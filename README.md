@@ -21,6 +21,8 @@ publishes only strict `StrategyIntentV1` messages. A gap, reorder, or conflictin
 bar blocks that symbol. PAPER requires Redis/PostgreSQL, rejects LIVE authority,
 and defaults to an empty strategy set. Because all existing sleeves are
 `REJECTED`, attempting to enable any of them in PAPER is a startup error.
+Deploy the consumer with the `runtime` extra; research/backtest installations
+do not pull the persistence or message-bus runtime.
 
 Every currently registered sleeve is `REJECTED`. Calling
 `generate_sleeve_intents(..., for_paper=True)` fails closed; this repository
