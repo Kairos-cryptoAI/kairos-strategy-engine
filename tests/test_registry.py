@@ -64,7 +64,11 @@ def test_registry_uses_the_exact_owned_generator_and_stable_order():
 
 def test_every_existing_sleeve_is_rejected_for_paper():
     assert STRATEGIES
-    assert {definition.status for definition in STRATEGIES.values()} == {StrategyStatus.REJECTED}
+    assert {definition.status for definition in STRATEGIES.values()} == {
+        StrategyStatus.REJECTED,
+        StrategyStatus.RESEARCH,
+    }
+    assert STRATEGIES["quarter_hour_flow_v1"].status is StrategyStatus.RESEARCH
     assert not any(definition.paper_enabled for definition in STRATEGIES.values())
 
     with pytest.raises(PaperStrategyDisabledError, match="not PAPER-approved"):

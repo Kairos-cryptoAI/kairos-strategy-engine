@@ -5,6 +5,7 @@ from .orderflow_volatility_expansion import (
     OrderFlowVolatilityExpansionConfig,
     generate_orderflow_volatility_expansion_intents,
 )
+from .quarter_hour_flow import QuarterHourFlowConfig, generate_quarter_hour_flow_intents
 from .range_mean_reversion import (
     RangeMeanReversionConfig,
     generate_range_mean_reversion_intents,
@@ -30,6 +31,7 @@ __all__ = [
     "OrderFlowExpansionVariant",
     "OrderFlowVolatilityExpansionConfig",
     "PullbackDepthVariant",
+    "QuarterHourFlowConfig",
     "RangeMeanReversionConfig",
     "RegimeRetestGenerationCounters",
     "RegimeRetestGenerationEvidence",
@@ -40,6 +42,7 @@ __all__ = [
     "TrendBreakoutConfig",
     "TrendPullbackReclaimConfig",
     "generate_orderflow_volatility_expansion_intents",
+    "generate_quarter_hour_flow_intents",
     "generate_range_mean_reversion_intents",
     "generate_regime_veto_retest_reclaim_evidence",
     "generate_regime_veto_retest_reclaim_intents",

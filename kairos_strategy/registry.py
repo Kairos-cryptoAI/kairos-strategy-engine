@@ -12,11 +12,13 @@ from .candles import Candle
 from .models import SleeveIntent
 from .sleeves import (
     OrderFlowVolatilityExpansionConfig,
+    QuarterHourFlowConfig,
     RangeMeanReversionConfig,
     RegimeVetoRetestReclaimConfig,
     TrendBreakoutConfig,
     TrendPullbackReclaimConfig,
     generate_orderflow_volatility_expansion_intents,
+    generate_quarter_hour_flow_intents,
     generate_range_mean_reversion_intents,
     generate_regime_veto_retest_reclaim_intents,
     generate_trend_breakout_intents,
@@ -79,6 +81,8 @@ def _definition(
     config_type: type[Any],
     generator: StrategyGenerator,
     module_name: str,
+    *,
+    status: StrategyStatus = StrategyStatus.REJECTED,
 ) -> StrategyDefinition:
     return StrategyDefinition(
         strategy_id=strategy_id,
@@ -86,10 +90,18 @@ def _definition(
         config_type=config_type,
         generator=generator,
         source_files=(*_COMMON_SOURCE_FILES, f"sleeves/{module_name}.py"),
+        status=status,
     )
 
 
 _DEFINITIONS = (
+    _definition(
+        "quarter_hour_flow_v1",
+        QuarterHourFlowConfig,
+        generate_quarter_hour_flow_intents,
+        "quarter_hour_flow",
+        status=StrategyStatus.RESEARCH,
+    ),
     _definition(
         "orderflow_volatility_expansion_v1",
         OrderFlowVolatilityExpansionConfig,

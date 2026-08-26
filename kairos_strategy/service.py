@@ -162,9 +162,7 @@ class StrategyEngineService:
             if self.settings.symbol_allowed(bar.symbol):
                 self._append_or_replay(bar)
         self._restored_through_ms = {
-            symbol: history[-1].open_time_ms
-            for symbol, history in self._bars.items()
-            if history
+            symbol: history[-1].open_time_ms for symbol, history in self._bars.items() if history
         }
         log.info(
             "strategy.history_restored",

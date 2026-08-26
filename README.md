@@ -19,12 +19,12 @@ strict `ClosedBarEventV1` messages through the transactional inbox/outbox,
 restores its bounded bar windows from the immutable PostgreSQL audit log, and
 publishes only strict `StrategyIntentV1` messages. A gap, reorder, or conflicting
 bar blocks that symbol. PAPER requires Redis/PostgreSQL, rejects LIVE authority,
-and defaults to an empty strategy set. Because all existing sleeves are
-`REJECTED`, attempting to enable any of them in PAPER is a startup error.
+and defaults to an empty strategy set. Because no existing sleeve is
+`PAPER_APPROVED`, attempting to enable any of them in PAPER is a startup error.
 Deploy the consumer with the `runtime` extra; research/backtest installations
 do not pull the persistence or message-bus runtime.
 
-Every currently registered sleeve is `REJECTED`. Calling
+Every currently registered sleeve is either `REJECTED` or pre-gate `RESEARCH`. Calling
 `generate_sleeve_intents(..., for_paper=True)` fails closed; this repository
 does not authorize a strategy for PAPER or LIVE trading. Promotion evidence is
 owned by `kairos-backtest`, and a future status change requires a separate,
@@ -39,6 +39,13 @@ reviewed commit after the offline gate passes.
 | `range_mean_reversion_v1` | `1` | `REJECTED` |
 | `orderflow_volatility_expansion_v1` | `1` | `REJECTED` |
 | `regime_veto_retest_reclaim_v1` | `1` | `REJECTED` |
+| `quarter_hour_flow_v1` | `1` | `RESEARCH` |
+
+`quarter_hour_flow_v1` is a causal one-minute proxy for the first-ten-second
+[quarter-hour order-flow effect documented by Kim and Hansen (2026)](https://arxiv.org/abs/2607.09426).
+The proxy,
+thresholds and fixed lifecycle are deliberately frozen before its reused-data
+screen; the paper's result is not treated as Kairos alpha evidence.
 
 The historical module paths in `kairos-backtest` are compatibility façades.
 They re-export these exact modules and classes rather than maintaining copies.
