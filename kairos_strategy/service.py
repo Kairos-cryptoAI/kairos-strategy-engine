@@ -5,7 +5,7 @@ from __future__ import annotations
 import asyncio
 import json
 from collections import defaultdict, deque
-from collections.abc import Mapping
+from collections.abc import Iterable, Mapping
 from typing import Any
 
 from kairos_core.bus import MessageBus, build_bus
@@ -127,6 +127,40 @@ class StrategyEngineService:
             await self.bus.publish(Topics.STRATEGY_INTENT, intent)
         return intents
 
+    def _restore_payloads(self, payloads: Iterable[object]) -> None:
+        """Restore every healthy symbol while quarantining a corrupt stream.
+
+        A historical conflict is local to one symbol.  It must prevent that
+        symbol from generating candidates, but it must not make the whole
+        multi-symbol service unavailable after every restart.
+        """
+
+        for raw_payload in payloads:
+            payload: Any = raw_payload
+            if isinstance(payload, str):
+                payload = json.loads(payload)
+            if not isinstance(payload, Mapping):
+                raise TypeError("event_audit closed-bar payload must be a JSON object")
+            bar = ClosedBarEventV1.model_validate(dict(payload))
+            if not self.settings.symbol_allowed(bar.symbol):
+                continue
+            if bar.symbol in self._blocked_symbols:
+                continue
+            try:
+                self._append_or_replay(bar)
+            except ClosedBarSequenceError as exc:
+                log.error(
+                    "strategy.history_symbol_blocked",
+                    symbol=bar.symbol,
+                    sequence_error=str(exc),
+                )
+
+        self._restored_through_ms = {
+            symbol: history[-1].open_time_ms
+            for symbol, history in self._bars.items()
+            if history and symbol not in self._blocked_symbols
+        }
+
     async def _restore_history(self) -> None:
         """Rebuild bounded per-symbol windows from the immutable audit log."""
 
@@ -152,22 +186,12 @@ class StrategyEngineService:
             Topics.CLOSED_BAR,
             self.settings.window_bars,
         )
-        for row in rows:
-            payload: Any = row["payload"]
-            if isinstance(payload, str):
-                payload = json.loads(payload)
-            if not isinstance(payload, Mapping):
-                raise TypeError("event_audit closed-bar payload must be a JSON object")
-            bar = ClosedBarEventV1.model_validate(dict(payload))
-            if self.settings.symbol_allowed(bar.symbol):
-                self._append_or_replay(bar)
-        self._restored_through_ms = {
-            symbol: history[-1].open_time_ms for symbol, history in self._bars.items() if history
-        }
+        self._restore_payloads(row["payload"] for row in rows)
         log.info(
             "strategy.history_restored",
             symbols=len(self._bars),
             bars=sum(len(history) for history in self._bars.values()),
+            blocked_symbols=sorted(self._blocked_symbols),
         )
 
     async def run(self) -> None:  # pragma: no cover - production consumer is unbounded
@@ -194,12 +218,16 @@ class StrategyEngineService:
                     await self.bus.ack(Topics.CLOSED_BAR, envelope, group="strategy-engine")
                 except ClosedBarSequenceError as exc:
                     log.exception(
-                        "strategy.closed_bar_failed",
+                        "strategy.closed_bar_quarantined",
                         envelope_id=envelope.id,
                         symbol=envelope.payload.get("symbol"),
                         error_type=type(exc).__name__,
                         sequence_error=str(exc),
                     )
+                    # The immutable event already exists in the durable audit
+                    # log.  Acknowledge this deterministic poison message so a
+                    # quarantined symbol cannot starve the healthy universe.
+                    await self.bus.ack(Topics.CLOSED_BAR, envelope, group="strategy-engine")
                 except Exception:
                     log.exception(
                         "strategy.closed_bar_failed",

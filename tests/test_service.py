@@ -190,3 +190,37 @@ def test_durable_restore_accepts_an_older_backfill_prefix_but_still_blocks_live_
     )
     with pytest.raises(ClosedBarSequenceError, match="gap or reorder"):
         service._append_or_replay(candle_to_closed_bar(reordered))
+
+
+def test_durable_restore_quarantines_only_the_conflicting_symbol():
+    btc_candles = _candles()[:3]
+    btc_bars = tuple(candle_to_closed_bar(candle) for candle in btc_candles)
+    conflicting_btc = candle_to_closed_bar(replace(btc_candles[0], close=99.9, low=99.7))
+    eth_bars = tuple(
+        candle_to_closed_bar(replace(candle, symbol="ETHUSDT")) for candle in btc_candles[:2]
+    )
+    settings = StrategyEngineSettings(
+        bus_backend="memory",
+        trading_symbols=["BTCUSDT", "ETHUSDT"],
+        window_bars=300,
+    )
+    service = StrategyEngineService(settings, bus=RecordingBus())
+
+    service._restore_payloads(
+        [
+            btc_bars[0].model_dump(mode="json"),
+            conflicting_btc.model_dump(mode="json"),
+            btc_bars[1].model_dump(mode="json"),
+            eth_bars[0].model_dump(mode="json"),
+            eth_bars[1].model_dump(mode="json"),
+        ]
+    )
+
+    assert service.blocked_symbols == {
+        "BTCUSDT": f"conflicting closed bar at {btc_bars[0].open_time_ms}"
+    }
+    assert [bar.open_time_ms for bar in service._bars["ETHUSDT"]] == [
+        eth_bars[0].open_time_ms,
+        eth_bars[1].open_time_ms,
+    ]
+    assert service._restored_through_ms == {"ETHUSDT": eth_bars[1].open_time_ms}
