@@ -196,9 +196,7 @@ def test_durable_restore_quarantines_only_the_conflicting_symbol():
     btc_candles = _candles()[:3]
     btc_bars = tuple(candle_to_closed_bar(candle) for candle in btc_candles)
     conflicting_btc = candle_to_closed_bar(replace(btc_candles[0], close=99.9, low=99.7))
-    eth_bars = tuple(
-        candle_to_closed_bar(replace(candle, symbol="ETHUSDT")) for candle in btc_candles[:2]
-    )
+    eth_bars = tuple(candle_to_closed_bar(replace(candle, symbol="ETHUSDT")) for candle in btc_candles[:2])
     settings = StrategyEngineSettings(
         bus_backend="memory",
         trading_symbols=["BTCUSDT", "ETHUSDT"],
@@ -216,9 +214,7 @@ def test_durable_restore_quarantines_only_the_conflicting_symbol():
         ]
     )
 
-    assert service.blocked_symbols == {
-        "BTCUSDT": f"conflicting closed bar at {btc_bars[0].open_time_ms}"
-    }
+    assert service.blocked_symbols == {"BTCUSDT": f"conflicting closed bar at {btc_bars[0].open_time_ms}"}
     assert [bar.open_time_ms for bar in service._bars["ETHUSDT"]] == [
         eth_bars[0].open_time_ms,
         eth_bars[1].open_time_ms,
