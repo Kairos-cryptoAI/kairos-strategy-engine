@@ -192,6 +192,14 @@ class StrategyEngineService:
                     bar = ClosedBarEventV1.model_validate(envelope.payload)
                     await self.process_bar(bar)
                     await self.bus.ack(Topics.CLOSED_BAR, envelope, group="strategy-engine")
+                except ClosedBarSequenceError as exc:
+                    log.exception(
+                        "strategy.closed_bar_failed",
+                        envelope_id=envelope.id,
+                        symbol=envelope.payload.get("symbol"),
+                        error_type=type(exc).__name__,
+                        sequence_error=str(exc),
+                    )
                 except Exception:
                     log.exception(
                         "strategy.closed_bar_failed",
