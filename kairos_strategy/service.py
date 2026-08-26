@@ -46,6 +46,12 @@ class StrategyEngineService:
             lambda: deque(maxlen=self.settings.window_bars)
         )
         self._blocked_symbols: dict[str, str] = {}
+        # A durable restart restores the retained strategy window from Postgres
+        # before the Redis consumer group starts.  The producer may then
+        # replay an older REST-backfill prefix whose deterministic messages
+        # were not present in the retained window at restore time.  Those
+        # messages are historical duplicates, not a live reorder.
+        self._restored_through_ms: dict[str, int] = {}
 
     @property
     def blocked_symbols(self) -> Mapping[str, str]:
@@ -69,6 +75,12 @@ class StrategyEngineService:
                 reason = f"conflicting closed bar at {bar.open_time_ms}"
                 self._block(bar.symbol, reason)
                 raise ClosedBarSequenceError(reason)
+        restored_through = self._restored_through_ms.get(bar.symbol)
+        if restored_through is not None and bar.open_time_ms <= restored_through:
+            # The overlapping portion of the restored window was checked
+            # above byte-for-byte.  Anything older is outside the retained
+            # strategy state and cannot causally produce a new intent.
+            return False
         if history:
             expected = history[-1].open_time_ms + _ONE_MINUTE_MS
             if bar.open_time_ms != expected:
@@ -149,6 +161,11 @@ class StrategyEngineService:
             bar = ClosedBarEventV1.model_validate(dict(payload))
             if self.settings.symbol_allowed(bar.symbol):
                 self._append_or_replay(bar)
+        self._restored_through_ms = {
+            symbol: history[-1].open_time_ms
+            for symbol, history in self._bars.items()
+            if history
+        }
         log.info(
             "strategy.history_restored",
             symbols=len(self._bars),

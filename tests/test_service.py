@@ -164,3 +164,29 @@ def test_empty_strategy_set_consumes_valid_bars_without_emitting_candidates():
     emitted = asyncio.run(service.process_bar(candle_to_closed_bar(_candles()[0])))
     assert emitted == ()
     assert bus.messages == []
+
+
+def test_durable_restore_accepts_an_older_backfill_prefix_but_still_blocks_live_reorder():
+    bars = tuple(candle_to_closed_bar(candle) for candle in _candles()[:5])
+    service = StrategyEngineService(_settings(), bus=RecordingBus())
+
+    # Simulate a bounded Postgres restore whose retained window starts after
+    # the producer's deterministic REST-backfill prefix.
+    assert service._append_or_replay(bars[2])
+    assert service._append_or_replay(bars[3])
+    service._restored_through_ms = {"BTCUSDT": bars[3].open_time_ms}
+
+    assert not service._append_or_replay(bars[0])
+    assert not service._append_or_replay(bars[1])
+    assert not service._append_or_replay(bars[2])
+    assert service._append_or_replay(bars[4])
+
+    # Once processing passes the restore watermark, an out-of-order live bar
+    # remains a hard integrity violation.
+    reordered = replace(
+        _candles()[4],
+        open_time_ms=bars[4].open_time_ms + 2 * 60_000,
+        close_time_ms=bars[4].close_time_ms + 2 * 60_000,
+    )
+    with pytest.raises(ClosedBarSequenceError, match="gap or reorder"):
+        service._append_or_replay(candle_to_closed_bar(reordered))
