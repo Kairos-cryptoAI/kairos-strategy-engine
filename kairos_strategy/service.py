@@ -17,6 +17,7 @@ from kairos_persistence import DurableMessageBus
 
 from .config import StrategyEngineSettings
 from .runtime import ClosedBarSequenceError, generate_runtime_strategy_intents
+from .runtime_requirements import get_runtime_requirements
 
 log = get_logger("strategy-engine")
 
@@ -96,6 +97,11 @@ class StrategyEngineService:
         emitted: list[StrategyIntentV1] = []
         history = tuple(self._bars[bar.symbol])
         for strategy_id in self.settings.enabled_strategy_ids:
+            requirements = get_runtime_requirements(strategy_id)
+            if len(history) < requirements.minimum_window_bars:
+                continue
+            if (bar.close_time_ms + 1) % (requirements.decision_interval_bars * _ONE_MINUTE_MS):
+                continue
             candidates = generate_runtime_strategy_intents(
                 strategy_id,
                 history,

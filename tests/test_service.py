@@ -16,6 +16,7 @@ from kairos_strategy.runtime import (
     candle_to_closed_bar,
     generate_runtime_strategy_intents,
 )
+from kairos_strategy.runtime_requirements import RuntimeRequirements
 from kairos_strategy.service import StrategyEngineService
 from kairos_strategy.sleeves import RangeMeanReversionConfig
 
@@ -164,6 +165,73 @@ def test_empty_strategy_set_consumes_valid_bars_without_emitting_candidates():
     emitted = asyncio.run(service.process_bar(candle_to_closed_bar(_candles()[0])))
     assert emitted == ()
     assert bus.messages == []
+
+
+def test_forward_frozen_strategy_rejects_an_insufficient_runtime_window():
+    with pytest.raises(ValueError, match=r"regime_aligned_right_tail_v1>=48000"):
+        StrategyEngineSettings(
+            bus_backend="memory",
+            trading_symbols=["BTCUSDT"],
+            enabled_strategy_ids=["regime_aligned_right_tail_v1"],
+            window_bars=47_999,
+        )
+
+    settings = StrategyEngineSettings(
+        bus_backend="memory",
+        trading_symbols=["BTCUSDT"],
+        enabled_strategy_ids=["regime_aligned_right_tail_v1"],
+        window_bars=48_000,
+    )
+    assert settings.window_bars == 48_000
+
+
+def test_generator_is_skipped_before_history_and_decision_clock_requirements(monkeypatch):
+    service = StrategyEngineService(
+        StrategyEngineSettings(
+            bus_backend="memory",
+            trading_symbols=["BTCUSDT"],
+            enabled_strategy_ids=["regime_aligned_right_tail_v1"],
+            window_bars=48_000,
+        ),
+        bus=RecordingBus(),
+    )
+    bar = candle_to_closed_bar(_candles()[0])
+
+    def unexpected_generator(*args, **kwargs):
+        raise AssertionError("generator must not run before its requirements are met")
+
+    monkeypatch.setattr("kairos_strategy.service.generate_runtime_strategy_intents", unexpected_generator)
+    assert service._generate_for_bar(bar) == ()
+
+
+def test_generator_runs_only_on_its_registered_decision_clock(monkeypatch):
+    service = StrategyEngineService(
+        StrategyEngineSettings(
+            bus_backend="memory",
+            trading_symbols=["BTCUSDT"],
+            enabled_strategy_ids=["regime_aligned_right_tail_v1"],
+            window_bars=48_000,
+        ),
+        bus=RecordingBus(),
+    )
+    bars = tuple(candle_to_closed_bar(candle) for candle in _candles()[:3])
+    calls: list[int] = []
+
+    monkeypatch.setattr(
+        "kairos_strategy.service.get_runtime_requirements",
+        lambda strategy_id: RuntimeRequirements(minimum_window_bars=2, decision_interval_bars=2),
+    )
+
+    def recording_generator(strategy_id, history, config=None, *, for_paper=False):
+        calls.append(history[-1].close_time_ms)
+        return ()
+
+    monkeypatch.setattr("kairos_strategy.service.generate_runtime_strategy_intents", recording_generator)
+    for bar in bars:
+        service._append_or_replay(bar)
+        assert service._generate_for_bar(bar) == ()
+
+    assert calls == [bars[1].close_time_ms]
 
 
 def test_durable_restore_accepts_an_older_backfill_prefix_but_still_blocks_live_reorder():

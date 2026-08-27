@@ -9,6 +9,7 @@ from kairos_core.enums import TradingMode
 from pydantic import Field, field_validator, model_validator
 
 from .registry import get_strategy
+from .runtime_requirements import get_runtime_requirements
 
 
 class StrategyEngineSettings(CoreSettings):
@@ -17,7 +18,7 @@ class StrategyEngineSettings(CoreSettings):
     service_name: str = "kairos-strategy-engine"
     trading_mode: TradingMode = TradingMode.DRY_RUN
     enabled_strategy_ids: list[str] = Field(default_factory=list)
-    window_bars: int = Field(default=1_440, ge=2, le=10_080)
+    window_bars: int = Field(default=1_440, ge=2, le=86_400)
 
     @field_validator("enabled_strategy_ids")
     @classmethod
@@ -49,4 +50,11 @@ class StrategyEngineSettings(CoreSettings):
                 raise ValueError(
                     "PAPER strategy-engine cannot enable non-approved strategies: " + ", ".join(disabled)
                 )
+        undersized = [
+            f"{strategy_id}>={get_runtime_requirements(strategy_id).minimum_window_bars}"
+            for strategy_id in self.enabled_strategy_ids
+            if self.window_bars < get_runtime_requirements(strategy_id).minimum_window_bars
+        ]
+        if undersized:
+            raise ValueError("window_bars is too small for enabled strategies: " + ", ".join(undersized))
         return self

@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "kairos-strategy-engine"
-version = "0.2.9"
+version = "0.2.10"
 description = "Deterministic strategy generators and their fail-closed runtime consumer."
 readme = "README.md"
 license = { text = "MIT" }
