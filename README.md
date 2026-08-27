@@ -40,7 +40,7 @@ reviewed commit after the offline gate passes.
 | `orderflow_volatility_expansion_v1` | `1` | `REJECTED` |
 | `regime_veto_retest_reclaim_v1` | `1` | `REJECTED` |
 | `quarter_hour_flow_v1` | `1` | `RESEARCH` |
-| `right_tail_trend_v1` | `1` | `RESEARCH` |
+| `right_tail_trend_v1` | `1` | `REJECTED` |
 
 `quarter_hour_flow_v1` is a causal one-minute proxy for the first-ten-second
 [quarter-hour order-flow effect documented by Kim and Hansen (2026)](https://arxiv.org/abs/2607.09426).
@@ -48,14 +48,14 @@ The proxy,
 thresholds and fixed lifecycle are deliberately frozen before its reused-data
 screen; the paper's result is not treated as Kairos alpha evidence.
 
-`right_tail_trend_v1` is a separately motivated post-anatomy research
-candidate. The failed `market_anatomy_v1` gate is not reinterpreted as prototype
-authorization: every archive used there remains reused development data. Once
-per UTC day the candidate uses the frozen 24-hour
-return-to-realized-variation score, with a symmetric 2 ATR stop, 4R target and
-72-hour timeout. The intentionally small parameter surface tests positive-skew
-trend capture, not another indicator conjunction. Its defaults are fixed before
-any new post-July-2026 archive is opened and it remains blocked from PAPER.
+`right_tail_trend_v1` is a separately motivated post-anatomy candidate. The
+failed `market_anatomy_v1` gate was not reinterpreted as prototype authorization:
+every archive used there remained reused development data. Once per UTC day the
+candidate used the frozen 24-hour return-to-realized-variation score, with a
+symmetric 2 ATR stop, 4R target and 72-hour timeout. Its consumed one-shot screen
+was rejected because robustness stress profit factor was `1.0382706977`, below
+the preregistered strict `>1.05` gate. No parameter was changed afterward and
+the exact candidate remains blocked from PAPER.
 
 The historical module paths in `kairos-backtest` are compatibility façades.
 They re-export these exact modules and classes rather than maintaining copies.

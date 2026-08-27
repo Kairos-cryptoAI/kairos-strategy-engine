@@ -76,7 +76,7 @@ def test_research_and_runtime_emit_byte_identical_ordered_contracts_and_ids():
     assert canonical_intent_batch_bytes(research) == canonical_intent_batch_bytes(runtime)
     assert (
         hashlib.sha256(canonical_intent_batch_bytes(research)).hexdigest()
-        == "8fa4110ec12d40a0623130157fc907081838aa5fdb810f69df61c230e35ce68c"
+        == "a71d9ae267556ef7362e58b6aa418c7cacd368b8f280989fd9496577245e8640"
     )
 
 

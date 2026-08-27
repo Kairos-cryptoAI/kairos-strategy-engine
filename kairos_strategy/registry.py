@@ -102,7 +102,6 @@ _DEFINITIONS = (
         RightTailTrendConfig,
         generate_right_tail_trend_intents,
         "right_tail_trend",
-        status=StrategyStatus.RESEARCH,
     ),
     _definition(
         "quarter_hour_flow_v1",
