@@ -42,8 +42,10 @@ reviewed commit after the offline gate passes.
 | `regime_veto_retest_reclaim_v1` | `1` | `REJECTED` |
 | `quarter_hour_flow_v1` | `1` | `RESEARCH` |
 | `right_tail_trend_v1` | `1` | `REJECTED` |
+| `regime_aligned_right_tail_v1` | `1` | `RESEARCH` |
 | `crowded_trend_continuation_v1` | `1` | `REJECTED` |
 | `donchian_ensemble_long_v1` | `1` | `INCONCLUSIVE` |
+| `four_hour_sma200_long_v1` | `1` | `REJECTED` |
 
 `quarter_hour_flow_v1` is a causal one-minute proxy for the first-ten-second
 [quarter-hour order-flow effect documented by Kim and Hansen (2026)](https://arxiv.org/abs/2607.09426).
@@ -59,6 +61,15 @@ symmetric 2 ATR stop, 4R target and 72-hour timeout. Its consumed one-shot scree
 was rejected because robustness stress profit factor was `1.0382706977`, below
 the preregistered strict `>1.05` gate. No parameter was changed afterward and
 the exact candidate remains blocked from PAPER.
+
+`regime_aligned_right_tail_v1` is the separately registered trial-15 synthesis.
+It preserves the exact daily right-tail signal and 2 ATR / 4R / 72-hour
+lifecycle, then admits a long only above the last complete four-hour SMA200 and
+a short only below it. The regime state cannot change side, size or exits. It
+has no performance result, is explicitly `RESEARCH`, and fails closed for
+PAPER. Since both source mechanisms and all archives through July 2026 have
+already been observed, a reused-data pass can only freeze the exact code for
+future evidence; it cannot establish alpha.
 
 `crowded_trend_continuation_v1` is a post-hoc contextual candidate prompted by
 the descriptive `derivatives_state_v1` study. It retains the study's exact

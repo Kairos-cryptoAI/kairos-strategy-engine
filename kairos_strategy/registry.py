@@ -19,6 +19,7 @@ from .sleeves import (
     OrderFlowVolatilityExpansionConfig,
     QuarterHourFlowConfig,
     RangeMeanReversionConfig,
+    RegimeAlignedRightTailConfig,
     RegimeVetoRetestReclaimConfig,
     RightTailTrendConfig,
     TrendBreakoutConfig,
@@ -29,6 +30,7 @@ from .sleeves import (
     generate_orderflow_volatility_expansion_intents,
     generate_quarter_hour_flow_intents,
     generate_range_mean_reversion_intents,
+    generate_regime_aligned_right_tail_intents,
     generate_regime_veto_retest_reclaim_intents,
     generate_right_tail_trend_intents,
     generate_trend_breakout_intents,
@@ -158,6 +160,13 @@ def _definition(
 
 
 _DEFINITIONS = (
+    _definition(
+        "regime_aligned_right_tail_v1",
+        RegimeAlignedRightTailConfig,
+        generate_regime_aligned_right_tail_intents,
+        "regime_aligned_right_tail",
+        status=StrategyStatus.RESEARCH,
+    ),
     _definition(
         "right_tail_trend_v1",
         RightTailTrendConfig,

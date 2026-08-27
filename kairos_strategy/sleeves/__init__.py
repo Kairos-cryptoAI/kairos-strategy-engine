@@ -16,6 +16,10 @@ from .range_mean_reversion import (
     RangeMeanReversionConfig,
     generate_range_mean_reversion_intents,
 )
+from .regime_aligned_right_tail import (
+    RegimeAlignedRightTailConfig,
+    generate_regime_aligned_right_tail_intents,
+)
 from .regime_retest_reclaim import (
     RegimeRetestGenerationCounters,
     RegimeRetestGenerationEvidence,
@@ -43,6 +47,7 @@ __all__ = [
     "PullbackDepthVariant",
     "QuarterHourFlowConfig",
     "RangeMeanReversionConfig",
+    "RegimeAlignedRightTailConfig",
     "RightTailTrendConfig",
     "RegimeRetestGenerationCounters",
     "RegimeRetestGenerationEvidence",
@@ -58,6 +63,7 @@ __all__ = [
     "generate_four_hour_sma200_allocations",
     "generate_quarter_hour_flow_intents",
     "generate_range_mean_reversion_intents",
+    "generate_regime_aligned_right_tail_intents",
     "generate_right_tail_trend_intents",
     "generate_regime_veto_retest_reclaim_evidence",
     "generate_regime_veto_retest_reclaim_intents",
