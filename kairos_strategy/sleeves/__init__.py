@@ -20,6 +20,7 @@ from .regime_retest_reclaim import (
     generate_regime_veto_retest_reclaim_evidence,
     generate_regime_veto_retest_reclaim_intents,
 )
+from .right_tail_trend import RightTailTrendConfig, generate_right_tail_trend_intents
 from .trend_breakout import TrendBreakoutConfig, generate_trend_breakout_intents
 from .trend_pullback_reclaim import (
     PullbackDepthVariant,
@@ -33,6 +34,7 @@ __all__ = [
     "PullbackDepthVariant",
     "QuarterHourFlowConfig",
     "RangeMeanReversionConfig",
+    "RightTailTrendConfig",
     "RegimeRetestGenerationCounters",
     "RegimeRetestGenerationEvidence",
     "RegimeRetestReclaimVariant",
@@ -44,6 +46,7 @@ __all__ = [
     "generate_orderflow_volatility_expansion_intents",
     "generate_quarter_hour_flow_intents",
     "generate_range_mean_reversion_intents",
+    "generate_right_tail_trend_intents",
     "generate_regime_veto_retest_reclaim_evidence",
     "generate_regime_veto_retest_reclaim_intents",
     "generate_trend_breakout_intents",

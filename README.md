@@ -40,12 +40,20 @@ reviewed commit after the offline gate passes.
 | `orderflow_volatility_expansion_v1` | `1` | `REJECTED` |
 | `regime_veto_retest_reclaim_v1` | `1` | `REJECTED` |
 | `quarter_hour_flow_v1` | `1` | `RESEARCH` |
+| `right_tail_trend_v1` | `1` | `RESEARCH` |
 
 `quarter_hour_flow_v1` is a causal one-minute proxy for the first-ten-second
 [quarter-hour order-flow effect documented by Kim and Hansen (2026)](https://arxiv.org/abs/2607.09426).
 The proxy,
 thresholds and fixed lifecycle are deliberately frozen before its reused-data
 screen; the paper's result is not treated as Kairos alpha evidence.
+
+`right_tail_trend_v1` is the first post-anatomy candidate. Once per UTC day it
+uses the frozen 24-hour return-to-realized-variation score measured by
+`market_anatomy_v1`, with a symmetric 2 ATR stop, 4R target and 72-hour timeout.
+The intentionally small parameter surface tests positive-skew trend capture,
+not another indicator conjunction. Its defaults are fixed before any new
+post-July-2026 archive is opened and it remains blocked from PAPER.
 
 The historical module paths in `kairos-backtest` are compatibility façades.
 They re-export these exact modules and classes rather than maintaining copies.

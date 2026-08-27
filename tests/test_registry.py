@@ -69,6 +69,7 @@ def test_every_existing_sleeve_is_rejected_for_paper():
         StrategyStatus.RESEARCH,
     }
     assert STRATEGIES["quarter_hour_flow_v1"].status is StrategyStatus.RESEARCH
+    assert STRATEGIES["right_tail_trend_v1"].status is StrategyStatus.RESEARCH
     assert not any(definition.paper_enabled for definition in STRATEGIES.values())
 
     with pytest.raises(PaperStrategyDisabledError, match="not PAPER-approved"):
