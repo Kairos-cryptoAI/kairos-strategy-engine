@@ -188,6 +188,7 @@ CONTEXTUAL_STRATEGIES: Mapping[str, ContextualStrategyDefinition] = MappingProxy
                 "factors.py",
                 "sleeves/crowded_trend_continuation.py",
             ),
+            status=StrategyStatus.REJECTED,
         )
     }
 )

@@ -41,7 +41,7 @@ reviewed commit after the offline gate passes.
 | `regime_veto_retest_reclaim_v1` | `1` | `REJECTED` |
 | `quarter_hour_flow_v1` | `1` | `RESEARCH` |
 | `right_tail_trend_v1` | `1` | `REJECTED` |
-| `crowded_trend_continuation_v1` | `1` | `RESEARCH` |
+| `crowded_trend_continuation_v1` | `1` | `REJECTED` |
 
 `quarter_hour_flow_v1` is a causal one-minute proxy for the first-ten-second
 [quarter-hour order-flow effect documented by Kim and Hansen (2026)](https://arxiv.org/abs/2607.09426).
@@ -67,6 +67,10 @@ candidate's fixed 2 ATR / 4R geometry, and times out at the study's exact
 24-hour outcome horizon. Its explicit factor-input registry is separate from
 the price-only runtime registry and remains fail-closed for PAPER. Reused-data
 evaluation may only reject it or freeze it for genuinely future evidence.
+Its consumed screen was rejected: stress profit factor was `1.0499` and
+`1.0458` against the preregistered strict `>1.05` gate, and each window had
+fewer than 25 short trades. Positive aggregate returns do not override those
+failures; the exact candidate remains blocked from PAPER.
 
 The historical module paths in `kairos-backtest` are compatibility façades.
 They re-export these exact modules and classes rather than maintaining copies.

@@ -135,7 +135,7 @@ def test_contextual_registry_is_stable_and_fails_closed_for_paper():
     )
 
     assert registered == direct
-    assert CONTEXTUAL_STRATEGIES["crowded_trend_continuation_v1"].status is StrategyStatus.RESEARCH
+    assert CONTEXTUAL_STRATEGIES["crowded_trend_continuation_v1"].status is StrategyStatus.REJECTED
     with pytest.raises(PaperStrategyDisabledError, match="not PAPER-approved"):
         generate_contextual_sleeve_intents("crowded_trend_continuation_v1", candles, factors, for_paper=True)
 
