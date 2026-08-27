@@ -116,7 +116,7 @@ def test_registry_uses_exact_generator_and_fails_closed_for_paper():
     registered = generate_target_allocations("four_hour_sma200_long_v1", source, config)
 
     assert registered == direct
-    assert ALLOCATION_STRATEGIES["four_hour_sma200_long_v1"].status is StrategyStatus.RESEARCH
+    assert ALLOCATION_STRATEGIES["four_hour_sma200_long_v1"].status is StrategyStatus.REJECTED
     with pytest.raises(PaperStrategyDisabledError, match="not PAPER-approved"):
         generate_target_allocations("four_hour_sma200_long_v1", source, config, for_paper=True)
 

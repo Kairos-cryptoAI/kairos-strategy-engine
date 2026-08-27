@@ -248,7 +248,7 @@ ALLOCATION_STRATEGIES: Mapping[str, AllocationStrategyDefinition] = MappingProxy
                 "allocation.py",
                 "sleeves/four_hour_sma200.py",
             ),
-            status=StrategyStatus.RESEARCH,
+            status=StrategyStatus.REJECTED,
         ),
     }
 )
