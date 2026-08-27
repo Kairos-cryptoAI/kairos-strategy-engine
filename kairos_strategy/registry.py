@@ -8,11 +8,13 @@ from enum import StrEnum
 from types import MappingProxyType
 from typing import Any
 
+from .allocation import TargetAllocation
 from .candles import Candle
 from .factors import DerivativeStateObservation
 from .models import SleeveIntent
 from .sleeves import (
     CrowdedTrendContinuationConfig,
+    DonchianEnsembleConfig,
     OrderFlowVolatilityExpansionConfig,
     QuarterHourFlowConfig,
     RangeMeanReversionConfig,
@@ -21,6 +23,7 @@ from .sleeves import (
     TrendBreakoutConfig,
     TrendPullbackReclaimConfig,
     generate_crowded_trend_continuation_intents,
+    generate_donchian_ensemble_allocations,
     generate_orderflow_volatility_expansion_intents,
     generate_quarter_hour_flow_intents,
     generate_range_mean_reversion_intents,
@@ -34,6 +37,7 @@ StrategyGenerator = Callable[[list[Candle], Any], list[SleeveIntent]]
 ContextualStrategyGenerator = Callable[
     [list[Candle], list[DerivativeStateObservation], Any], list[SleeveIntent]
 ]
+AllocationStrategyGenerator = Callable[[list[Candle], Any], list[TargetAllocation]]
 
 
 class StrategyStatus(StrEnum):
@@ -78,6 +82,30 @@ class ContextualStrategyDefinition:
     revision: str
     config_type: type[Any]
     generator: ContextualStrategyGenerator
+    source_files: tuple[str, ...]
+    status: StrategyStatus = StrategyStatus.RESEARCH
+
+    def __post_init__(self) -> None:
+        if not self.strategy_id or self.strategy_id != self.strategy_id.strip():
+            raise ValueError("strategy_id must be a normalized non-empty string")
+        if not self.revision or self.revision != self.revision.strip():
+            raise ValueError("revision must be a normalized non-empty string")
+        if not self.source_files or len(set(self.source_files)) != len(self.source_files):
+            raise ValueError("source_files must be non-empty and unique")
+        if not isinstance(self.status, StrategyStatus):
+            raise ValueError("status must be a StrategyStatus")
+
+    @property
+    def paper_enabled(self) -> bool:
+        return self.status is StrategyStatus.PAPER_APPROVED
+
+
+@dataclass(frozen=True, slots=True)
+class AllocationStrategyDefinition:
+    strategy_id: str
+    revision: str
+    config_type: type[Any]
+    generator: AllocationStrategyGenerator
     source_files: tuple[str, ...]
     status: StrategyStatus = StrategyStatus.RESEARCH
 
@@ -193,6 +221,22 @@ CONTEXTUAL_STRATEGIES: Mapping[str, ContextualStrategyDefinition] = MappingProxy
     }
 )
 
+ALLOCATION_STRATEGIES: Mapping[str, AllocationStrategyDefinition] = MappingProxyType(
+    {
+        "donchian_ensemble_long_v1": AllocationStrategyDefinition(
+            strategy_id="donchian_ensemble_long_v1",
+            revision="1",
+            config_type=DonchianEnsembleConfig,
+            generator=generate_donchian_ensemble_allocations,
+            source_files=(
+                *_COMMON_SOURCE_FILES,
+                "allocation.py",
+                "sleeves/donchian_ensemble.py",
+            ),
+        )
+    }
+)
+
 
 def get_strategy(strategy_id: str) -> StrategyDefinition:
     try:
@@ -206,6 +250,13 @@ def get_contextual_strategy(strategy_id: str) -> ContextualStrategyDefinition:
         return CONTEXTUAL_STRATEGIES[strategy_id]
     except KeyError as exc:
         raise KeyError(f"unknown contextual strategy_id: {strategy_id}") from exc
+
+
+def get_allocation_strategy(strategy_id: str) -> AllocationStrategyDefinition:
+    try:
+        return ALLOCATION_STRATEGIES[strategy_id]
+    except KeyError as exc:
+        raise KeyError(f"unknown allocation strategy_id: {strategy_id}") from exc
 
 
 def generate_sleeve_intents(
@@ -273,3 +324,24 @@ def generate_contextual_sleeve_intents(
             ),
         )
     )
+
+
+def generate_target_allocations(
+    strategy_id: str,
+    candles: Sequence[Candle],
+    config: object | None = None,
+    *,
+    for_paper: bool = False,
+) -> tuple[TargetAllocation, ...]:
+    definition = get_allocation_strategy(strategy_id)
+    if for_paper and not definition.paper_enabled:
+        raise PaperStrategyDisabledError(f"{strategy_id} is not PAPER-approved")
+    settings = definition.config_type() if config is None else config
+    if not isinstance(settings, definition.config_type):
+        raise TypeError(f"config for {strategy_id} must be {definition.config_type.__name__}")
+    generated = definition.generator(list(candles), settings)
+    if any(not isinstance(allocation, TargetAllocation) for allocation in generated):
+        raise TypeError("allocation generators must return TargetAllocation values")
+    if any(allocation.strategy_id != strategy_id for allocation in generated):
+        raise ValueError("allocation generator emitted a target with the wrong strategy id")
+    return tuple(sorted(generated, key=lambda item: (item.decision_ts_ms, item.symbol, item.allocation_id)))

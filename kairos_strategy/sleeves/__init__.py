@@ -4,6 +4,7 @@ from .crowded_trend_continuation import (
     CrowdedTrendContinuationConfig,
     generate_crowded_trend_continuation_intents,
 )
+from .donchian_ensemble import DonchianEnsembleConfig, generate_donchian_ensemble_allocations
 from .orderflow_volatility_expansion import (
     OrderFlowExpansionVariant,
     OrderFlowVolatilityExpansionConfig,
@@ -34,6 +35,7 @@ from .trend_pullback_reclaim import (
 
 __all__ = [
     "CrowdedTrendContinuationConfig",
+    "DonchianEnsembleConfig",
     "OrderFlowExpansionVariant",
     "OrderFlowVolatilityExpansionConfig",
     "PullbackDepthVariant",
@@ -50,6 +52,7 @@ __all__ = [
     "TrendPullbackReclaimConfig",
     "generate_orderflow_volatility_expansion_intents",
     "generate_crowded_trend_continuation_intents",
+    "generate_donchian_ensemble_allocations",
     "generate_quarter_hour_flow_intents",
     "generate_range_mean_reversion_intents",
     "generate_right_tail_trend_intents",

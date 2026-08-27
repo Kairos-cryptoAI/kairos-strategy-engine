@@ -4,6 +4,7 @@ The package is intentionally pure: no exchange clients, LLMs, environment
 secrets, wall-clock reads, or randomness are permitted in strategy generation.
 """
 
+from .allocation import AllocationReason, TargetAllocation
 from .candles import Candle
 from .config import StrategyEngineSettings
 from .factors import DerivativeStateObservation, canonical_derivative_observations
@@ -19,14 +20,18 @@ from .provenance import (
     source_tree_sha256,
 )
 from .registry import (
+    ALLOCATION_STRATEGIES,
     CONTEXTUAL_STRATEGIES,
     STRATEGIES,
+    AllocationStrategyDefinition,
     ContextualStrategyDefinition,
     PaperStrategyDisabledError,
     StrategyDefinition,
     StrategyStatus,
     generate_contextual_sleeve_intents,
     generate_sleeve_intents,
+    generate_target_allocations,
+    get_allocation_strategy,
     get_contextual_strategy,
     get_strategy,
 )
@@ -44,7 +49,10 @@ from .sleeves import *  # noqa: F403
 from .sleeves import __all__ as _sleeve_exports
 
 __all__ = [
+    "ALLOCATION_STRATEGIES",
     "CONTEXTUAL_STRATEGIES",
+    "AllocationReason",
+    "AllocationStrategyDefinition",
     "STRATEGIES",
     "Candle",
     "ContextualStrategyDefinition",
@@ -58,6 +66,7 @@ __all__ = [
     "StrategyEngineSettings",
     "StrategyStatus",
     "TradeRecord",
+    "TargetAllocation",
     "UnsupportedExitPlanError",
     "candle_to_closed_bar",
     "candle_payload",
@@ -70,10 +79,12 @@ __all__ = [
     "features_sha256",
     "generate_sleeve_intents",
     "generate_contextual_sleeve_intents",
+    "generate_target_allocations",
     "generate_research_strategy_intents",
     "generate_runtime_strategy_intents",
     "get_strategy",
     "get_contextual_strategy",
+    "get_allocation_strategy",
     "input_window_sha256",
     "installed_source_tree_sha256",
     "source_tree_sha256",

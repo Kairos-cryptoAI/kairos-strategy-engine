@@ -42,6 +42,7 @@ reviewed commit after the offline gate passes.
 | `quarter_hour_flow_v1` | `1` | `RESEARCH` |
 | `right_tail_trend_v1` | `1` | `REJECTED` |
 | `crowded_trend_continuation_v1` | `1` | `REJECTED` |
+| `donchian_ensemble_long_v1` | `1` | `RESEARCH` |
 
 `quarter_hour_flow_v1` is a causal one-minute proxy for the first-ten-second
 [quarter-hour order-flow effect documented by Kim and Hansen (2026)](https://arxiv.org/abs/2607.09426).
@@ -71,6 +72,16 @@ Its consumed screen was rejected: stress profit factor was `1.0499` and
 `1.0458` against the preregistered strict `>1.05` gate, and each window had
 fewer than 25 short trades. Positive aggregate returns do not override those
 failures; the exact candidate remains blocked from PAPER.
+
+`donchian_ensemble_long_v1` is a pure target-allocation implementation of the
+long-only model published by Zarattini, Pagani and Barbon (2025). It combines
+5/10/20/30/60/90/150/250/360-day close-based Donchian channels, monotonic
+mid-channel stops and a 90-day volatility target of 25% capped at 2x. A relative
+20% deadband applies only to volatility-driven resizing; signal entries and
+exits update immediately. Targets decided at one UTC daily close become
+effective on the next day. The allocation registry is separate from order
+intents because the current PAPER lifecycle cannot yet execute dynamic target
+weights or daily moving stops; `for_paper=True` therefore fails closed.
 
 The historical module paths in `kairos-backtest` are compatibility façades.
 They re-export these exact modules and classes rather than maintaining copies.
