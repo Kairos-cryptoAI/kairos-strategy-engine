@@ -24,8 +24,8 @@ and defaults to an empty strategy set. Because no existing sleeve is
 Deploy the consumer with the `runtime` extra; research/backtest installations
 do not pull the persistence or message-bus runtime.
 
-Every currently registered sleeve is `REJECTED`, pre-gate `RESEARCH`, or
-`INCONCLUSIVE` after a consumed evaluation that produced no strategy result. Calling
+Every currently registered sleeve is `REJECTED`, pre-gate `RESEARCH`,
+`FORWARD_FROZEN`, or `INCONCLUSIVE` after a consumed evaluation that produced no strategy result. Calling
 `generate_sleeve_intents(..., for_paper=True)` fails closed; this repository
 does not authorize a strategy for PAPER or LIVE trading. Promotion evidence is
 owned by `kairos-backtest`, and a future status change requires a separate,
@@ -42,7 +42,7 @@ reviewed commit after the offline gate passes.
 | `regime_veto_retest_reclaim_v1` | `1` | `REJECTED` |
 | `quarter_hour_flow_v1` | `1` | `RESEARCH` |
 | `right_tail_trend_v1` | `1` | `REJECTED` |
-| `regime_aligned_right_tail_v1` | `1` | `RESEARCH` |
+| `regime_aligned_right_tail_v1` | `1` | `FORWARD_FROZEN` |
 | `crowded_trend_continuation_v1` | `1` | `REJECTED` |
 | `donchian_ensemble_long_v1` | `1` | `INCONCLUSIVE` |
 | `four_hour_sma200_long_v1` | `1` | `REJECTED` |
@@ -66,10 +66,11 @@ the exact candidate remains blocked from PAPER.
 It preserves the exact daily right-tail signal and 2 ATR / 4R / 72-hour
 lifecycle, then admits a long only above the last complete four-hour SMA200 and
 a short only below it. The regime state cannot change side, size or exits. It
-has no performance result, is explicitly `RESEARCH`, and fails closed for
-PAPER. Since both source mechanisms and all archives through July 2026 have
-already been observed, a reused-data pass can only freeze the exact code for
-future evidence; it cannot establish alpha.
+passed every absolute and base-improvement gate in its one-shot reused-data
+screen. The exact source is therefore `FORWARD_FROZEN` for observations
+beginning no earlier than 2026-09-01, but still fails closed for PAPER. Since
+both source mechanisms and all archives through July 2026 had already been
+observed, the result cannot establish alpha.
 
 `crowded_trend_continuation_v1` is a post-hoc contextual candidate prompted by
 the descriptive `derivatives_state_v1` study. It retains the study's exact

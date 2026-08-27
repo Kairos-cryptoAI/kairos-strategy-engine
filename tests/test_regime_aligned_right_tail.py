@@ -149,7 +149,7 @@ def test_registry_uses_exact_generator_and_fails_closed_for_paper():
     registered = generate_sleeve_intents("regime_aligned_right_tail_v1", source, config)
 
     assert direct == registered
-    assert STRATEGIES["regime_aligned_right_tail_v1"].status is StrategyStatus.RESEARCH
+    assert STRATEGIES["regime_aligned_right_tail_v1"].status is StrategyStatus.FORWARD_FROZEN
     with pytest.raises(PaperStrategyDisabledError, match="not PAPER-approved"):
         generate_sleeve_intents("regime_aligned_right_tail_v1", source, config, for_paper=True)
 

@@ -50,6 +50,7 @@ class StrategyStatus(StrEnum):
     INCONCLUSIVE = "inconclusive"
     REJECTED = "rejected"
     RESEARCH = "research"
+    FORWARD_FROZEN = "forward_frozen"
     PAPER_APPROVED = "paper_approved"
 
 
@@ -165,7 +166,7 @@ _DEFINITIONS = (
         RegimeAlignedRightTailConfig,
         generate_regime_aligned_right_tail_intents,
         "regime_aligned_right_tail",
-        status=StrategyStatus.RESEARCH,
+        status=StrategyStatus.FORWARD_FROZEN,
     ),
     _definition(
         "right_tail_trend_v1",
