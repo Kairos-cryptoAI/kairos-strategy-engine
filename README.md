@@ -7,8 +7,8 @@ runtime candidate generation. The package also provides the thin
 ## Safety boundary
 
 The generator modules contain only pure transformations from complete, closed
-market bars plus an explicit immutable configuration to ordered strategy
-candidates. They contain no LLM client, exchange client, environment-secret
+market bars, explicitly supplied immutable factor observations and an immutable
+configuration to ordered strategy candidates. They contain no LLM client, exchange client, environment-secret
 reads, wall-clock reads, or randomness. The same input bytes and configuration
 therefore produce the same candidate bytes and IDs on Windows and Linux. The
 package owns its minimal closed-bar value and indicator primitives, so research
@@ -41,6 +41,7 @@ reviewed commit after the offline gate passes.
 | `regime_veto_retest_reclaim_v1` | `1` | `REJECTED` |
 | `quarter_hour_flow_v1` | `1` | `RESEARCH` |
 | `right_tail_trend_v1` | `1` | `REJECTED` |
+| `crowded_trend_continuation_v1` | `1` | `RESEARCH` |
 
 `quarter_hour_flow_v1` is a causal one-minute proxy for the first-ten-second
 [quarter-hour order-flow effect documented by Kim and Hansen (2026)](https://arxiv.org/abs/2607.09426).
@@ -56,6 +57,16 @@ symmetric 2 ATR stop, 4R target and 72-hour timeout. Its consumed one-shot scree
 was rejected because robustness stress profit factor was `1.0382706977`, below
 the preregistered strict `>1.05` gate. No parameter was changed afterward and
 the exact candidate remains blocked from PAPER.
+
+`crowded_trend_continuation_v1` is a post-hoc contextual candidate prompted by
+the descriptive `derivatives_state_v1` study. It retains the study's exact
+global thresholds: absolute 24-hour trend score at least `1`, open-interest
+growth at least `5%`, and either direction-aligned premium at least `5 bps` or
+funding at least `1 bp`. It evaluates every complete UTC hour, uses the prior
+candidate's fixed 2 ATR / 4R geometry, and times out at the study's exact
+24-hour outcome horizon. Its explicit factor-input registry is separate from
+the price-only runtime registry and remains fail-closed for PAPER. Reused-data
+evaluation may only reject it or freeze it for genuinely future evidence.
 
 The historical module paths in `kairos-backtest` are compatibility façades.
 They re-export these exact modules and classes rather than maintaining copies.

@@ -9,8 +9,10 @@ from types import MappingProxyType
 from typing import Any
 
 from .candles import Candle
+from .factors import DerivativeStateObservation
 from .models import SleeveIntent
 from .sleeves import (
+    CrowdedTrendContinuationConfig,
     OrderFlowVolatilityExpansionConfig,
     QuarterHourFlowConfig,
     RangeMeanReversionConfig,
@@ -18,6 +20,7 @@ from .sleeves import (
     RightTailTrendConfig,
     TrendBreakoutConfig,
     TrendPullbackReclaimConfig,
+    generate_crowded_trend_continuation_intents,
     generate_orderflow_volatility_expansion_intents,
     generate_quarter_hour_flow_intents,
     generate_range_mean_reversion_intents,
@@ -28,6 +31,9 @@ from .sleeves import (
 )
 
 StrategyGenerator = Callable[[list[Candle], Any], list[SleeveIntent]]
+ContextualStrategyGenerator = Callable[
+    [list[Candle], list[DerivativeStateObservation], Any], list[SleeveIntent]
+]
 
 
 class StrategyStatus(StrEnum):
@@ -50,6 +56,30 @@ class StrategyDefinition:
     generator: StrategyGenerator
     source_files: tuple[str, ...]
     status: StrategyStatus = StrategyStatus.REJECTED
+
+    def __post_init__(self) -> None:
+        if not self.strategy_id or self.strategy_id != self.strategy_id.strip():
+            raise ValueError("strategy_id must be a normalized non-empty string")
+        if not self.revision or self.revision != self.revision.strip():
+            raise ValueError("revision must be a normalized non-empty string")
+        if not self.source_files or len(set(self.source_files)) != len(self.source_files):
+            raise ValueError("source_files must be non-empty and unique")
+        if not isinstance(self.status, StrategyStatus):
+            raise ValueError("status must be a StrategyStatus")
+
+    @property
+    def paper_enabled(self) -> bool:
+        return self.status is StrategyStatus.PAPER_APPROVED
+
+
+@dataclass(frozen=True, slots=True)
+class ContextualStrategyDefinition:
+    strategy_id: str
+    revision: str
+    config_type: type[Any]
+    generator: ContextualStrategyGenerator
+    source_files: tuple[str, ...]
+    status: StrategyStatus = StrategyStatus.RESEARCH
 
     def __post_init__(self) -> None:
         if not self.strategy_id or self.strategy_id != self.strategy_id.strip():
@@ -146,12 +176,35 @@ STRATEGIES: Mapping[str, StrategyDefinition] = MappingProxyType(
     {definition.strategy_id: definition for definition in _DEFINITIONS}
 )
 
+CONTEXTUAL_STRATEGIES: Mapping[str, ContextualStrategyDefinition] = MappingProxyType(
+    {
+        "crowded_trend_continuation_v1": ContextualStrategyDefinition(
+            strategy_id="crowded_trend_continuation_v1",
+            revision="1",
+            config_type=CrowdedTrendContinuationConfig,
+            generator=generate_crowded_trend_continuation_intents,
+            source_files=(
+                *_COMMON_SOURCE_FILES,
+                "factors.py",
+                "sleeves/crowded_trend_continuation.py",
+            ),
+        )
+    }
+)
+
 
 def get_strategy(strategy_id: str) -> StrategyDefinition:
     try:
         return STRATEGIES[strategy_id]
     except KeyError as exc:
         raise KeyError(f"unknown strategy_id: {strategy_id}") from exc
+
+
+def get_contextual_strategy(strategy_id: str) -> ContextualStrategyDefinition:
+    try:
+        return CONTEXTUAL_STRATEGIES[strategy_id]
+    except KeyError as exc:
+        raise KeyError(f"unknown contextual strategy_id: {strategy_id}") from exc
 
 
 def generate_sleeve_intents(
@@ -174,6 +227,40 @@ def generate_sleeve_intents(
         raise TypeError("strategy generators must return SleeveIntent values")
     if any(intent.sleeve_id != strategy_id for intent in generated):
         raise ValueError("strategy generator emitted an intent with the wrong strategy id")
+    return tuple(
+        sorted(
+            generated,
+            key=lambda intent: (
+                intent.decision_ts_ms,
+                intent.symbol,
+                intent.side.value,
+                intent.intent_id,
+            ),
+        )
+    )
+
+
+def generate_contextual_sleeve_intents(
+    strategy_id: str,
+    candles: Sequence[Candle],
+    factor_observations: Sequence[DerivativeStateObservation],
+    config: object | None = None,
+    *,
+    for_paper: bool = False,
+) -> tuple[SleeveIntent, ...]:
+    """Generate a stable contextual intent batch from explicit immutable inputs."""
+
+    definition = get_contextual_strategy(strategy_id)
+    if for_paper and not definition.paper_enabled:
+        raise PaperStrategyDisabledError(f"{strategy_id} is not PAPER-approved")
+    settings = definition.config_type() if config is None else config
+    if not isinstance(settings, definition.config_type):
+        raise TypeError(f"config for {strategy_id} must be {definition.config_type.__name__}")
+    generated = definition.generator(list(candles), list(factor_observations), settings)
+    if any(not isinstance(intent, SleeveIntent) for intent in generated):
+        raise TypeError("contextual strategy generators must return SleeveIntent values")
+    if any(intent.sleeve_id != strategy_id for intent in generated):
+        raise ValueError("contextual strategy generator emitted an intent with the wrong strategy id")
     return tuple(
         sorted(
             generated,
