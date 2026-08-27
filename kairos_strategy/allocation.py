@@ -24,7 +24,7 @@ class TargetAllocation:
     decision_ts_ms: int
     effective_ts_ms: int
     target_weight: float
-    annualized_volatility: float
+    annualized_volatility: float | None
     active_horizons: tuple[int, ...]
     trailing_stops: tuple[tuple[int, float], ...]
     reason: AllocationReason
@@ -50,13 +50,14 @@ class TargetAllocation:
             or not 0 <= self.target_weight <= 2
         ):
             raise ValueError("target_weight must be finite within [0, 2]")
-        if (
-            isinstance(self.annualized_volatility, bool)
-            or not isinstance(self.annualized_volatility, (int, float))
-            or not math.isfinite(self.annualized_volatility)
-            or self.annualized_volatility <= 0
-        ):
-            raise ValueError("annualized_volatility must be finite and positive")
+        if self.annualized_volatility is not None:
+            if (
+                isinstance(self.annualized_volatility, bool)
+                or not isinstance(self.annualized_volatility, (int, float))
+                or not math.isfinite(self.annualized_volatility)
+                or self.annualized_volatility <= 0
+            ):
+                raise ValueError("annualized_volatility must be None or finite and positive")
         if tuple(sorted(set(self.active_horizons))) != self.active_horizons:
             raise ValueError("active_horizons must be sorted and unique")
         stop_horizons = tuple(horizon for horizon, _ in self.trailing_stops)
@@ -77,7 +78,8 @@ class TargetAllocation:
         ):
             raise ValueError("metadata must contain unique normalized string pairs")
         object.__setattr__(self, "target_weight", float(self.target_weight))
-        object.__setattr__(self, "annualized_volatility", float(self.annualized_volatility))
+        if self.annualized_volatility is not None:
+            object.__setattr__(self, "annualized_volatility", float(self.annualized_volatility))
         object.__setattr__(self, "metadata", canonical_metadata)
         payload = {
             "active_horizons": self.active_horizons,

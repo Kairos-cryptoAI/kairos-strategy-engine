@@ -15,6 +15,7 @@ from .models import SleeveIntent
 from .sleeves import (
     CrowdedTrendContinuationConfig,
     DonchianEnsembleConfig,
+    FourHourSma200Config,
     OrderFlowVolatilityExpansionConfig,
     QuarterHourFlowConfig,
     RangeMeanReversionConfig,
@@ -24,6 +25,7 @@ from .sleeves import (
     TrendPullbackReclaimConfig,
     generate_crowded_trend_continuation_intents,
     generate_donchian_ensemble_allocations,
+    generate_four_hour_sma200_allocations,
     generate_orderflow_volatility_expansion_intents,
     generate_quarter_hour_flow_intents,
     generate_range_mean_reversion_intents,
@@ -235,7 +237,19 @@ ALLOCATION_STRATEGIES: Mapping[str, AllocationStrategyDefinition] = MappingProxy
                 "sleeves/donchian_ensemble.py",
             ),
             status=StrategyStatus.INCONCLUSIVE,
-        )
+        ),
+        "four_hour_sma200_long_v1": AllocationStrategyDefinition(
+            strategy_id="four_hour_sma200_long_v1",
+            revision="1",
+            config_type=FourHourSma200Config,
+            generator=generate_four_hour_sma200_allocations,
+            source_files=(
+                *_COMMON_SOURCE_FILES,
+                "allocation.py",
+                "sleeves/four_hour_sma200.py",
+            ),
+            status=StrategyStatus.RESEARCH,
+        ),
     }
 )
 

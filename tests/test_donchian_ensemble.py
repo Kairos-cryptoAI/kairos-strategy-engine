@@ -163,3 +163,19 @@ def test_target_allocation_rejects_mismatched_stop_lineage():
             trailing_stops=(),
             reason=AllocationReason.SIGNAL,
         )
+
+
+def test_target_allocation_allows_explicitly_unused_volatility():
+    target = TargetAllocation(
+        strategy_id="x",
+        symbol="BTCUSDT",
+        decision_ts_ms=1,
+        effective_ts_ms=2,
+        target_weight=0.0,
+        annualized_volatility=None,
+        active_horizons=(),
+        trailing_stops=(),
+        reason=AllocationReason.SIGNAL,
+    )
+
+    assert target.annualized_volatility is None
