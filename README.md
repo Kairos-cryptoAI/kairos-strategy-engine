@@ -72,10 +72,11 @@ beginning no earlier than 2026-09-01, but still fails closed for PAPER. Since
 both source mechanisms and all archives through July 2026 had already been
 observed, the result cannot establish alpha.
 
-The runtime shell requires at least `48,000` contiguous one-minute bars for
-this sleeve (200 complete four-hour bars) and evaluates it only at its UTC
-daily decision boundary. Startup fails when the configured window is smaller,
-instead of running indefinitely with a silent zero-signal history.
+The runtime shell requires at least `48,060` contiguous one-minute bars for
+this sleeve (200 complete four-hour bars plus the `00:00–00:59 UTC` decision
+hour) and evaluates it only after that daily hour closes. Startup fails when
+the configured window is smaller, instead of running indefinitely with a
+silent zero-signal history.
 
 `crowded_trend_continuation_v1` is a post-hoc contextual candidate prompted by
 the descriptive `derivatives_state_v1` study. It retains the study's exact

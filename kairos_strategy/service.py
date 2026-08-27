@@ -100,7 +100,8 @@ class StrategyEngineService:
             requirements = get_runtime_requirements(strategy_id)
             if len(history) < requirements.minimum_window_bars:
                 continue
-            if (bar.close_time_ms + 1) % (requirements.decision_interval_bars * _ONE_MINUTE_MS):
+            closed_minute = (bar.close_time_ms + 1) // _ONE_MINUTE_MS
+            if closed_minute % requirements.decision_interval_bars != requirements.decision_phase_bars:
                 continue
             candidates = generate_runtime_strategy_intents(
                 strategy_id,

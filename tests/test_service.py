@@ -168,21 +168,21 @@ def test_empty_strategy_set_consumes_valid_bars_without_emitting_candidates():
 
 
 def test_forward_frozen_strategy_rejects_an_insufficient_runtime_window():
-    with pytest.raises(ValueError, match=r"regime_aligned_right_tail_v1>=48000"):
+    with pytest.raises(ValueError, match=r"regime_aligned_right_tail_v1>=48060"):
         StrategyEngineSettings(
             bus_backend="memory",
             trading_symbols=["BTCUSDT"],
             enabled_strategy_ids=["regime_aligned_right_tail_v1"],
-            window_bars=47_999,
+            window_bars=48_059,
         )
 
     settings = StrategyEngineSettings(
         bus_backend="memory",
         trading_symbols=["BTCUSDT"],
         enabled_strategy_ids=["regime_aligned_right_tail_v1"],
-        window_bars=48_000,
+        window_bars=48_060,
     )
-    assert settings.window_bars == 48_000
+    assert settings.window_bars == 48_060
 
 
 def test_generator_is_skipped_before_history_and_decision_clock_requirements(monkeypatch):
@@ -191,7 +191,7 @@ def test_generator_is_skipped_before_history_and_decision_clock_requirements(mon
             bus_backend="memory",
             trading_symbols=["BTCUSDT"],
             enabled_strategy_ids=["regime_aligned_right_tail_v1"],
-            window_bars=48_000,
+            window_bars=48_060,
         ),
         bus=RecordingBus(),
     )
@@ -210,7 +210,7 @@ def test_generator_runs_only_on_its_registered_decision_clock(monkeypatch):
             bus_backend="memory",
             trading_symbols=["BTCUSDT"],
             enabled_strategy_ids=["regime_aligned_right_tail_v1"],
-            window_bars=48_000,
+            window_bars=48_060,
         ),
         bus=RecordingBus(),
     )
@@ -219,7 +219,11 @@ def test_generator_runs_only_on_its_registered_decision_clock(monkeypatch):
 
     monkeypatch.setattr(
         "kairos_strategy.service.get_runtime_requirements",
-        lambda strategy_id: RuntimeRequirements(minimum_window_bars=2, decision_interval_bars=2),
+        lambda strategy_id: RuntimeRequirements(
+            minimum_window_bars=2,
+            decision_interval_bars=2,
+            decision_phase_bars=0,
+        ),
     )
 
     def recording_generator(strategy_id, history, config=None, *, for_paper=False):

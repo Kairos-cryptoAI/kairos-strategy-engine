@@ -17,6 +17,7 @@ class RuntimeRequirements:
 
     minimum_window_bars: int = 2
     decision_interval_bars: int = 1
+    decision_phase_bars: int = 0
 
     def __post_init__(self) -> None:
         for name, value in (
@@ -25,6 +26,12 @@ class RuntimeRequirements:
         ):
             if isinstance(value, bool) or not isinstance(value, int) or value <= 0:
                 raise ValueError(f"{name} must be a positive integer")
+        if (
+            isinstance(self.decision_phase_bars, bool)
+            or not isinstance(self.decision_phase_bars, int)
+            or not 0 <= self.decision_phase_bars < self.decision_interval_bars
+        ):
+            raise ValueError("decision_phase_bars must lie within the decision interval")
 
 
 _DEFAULT = RuntimeRequirements()
@@ -32,8 +39,9 @@ _REQUIREMENTS = MappingProxyType(
     {
         # 200 complete 4h bars.  The daily clock is UTC epoch-aligned.
         "regime_aligned_right_tail_v1": RuntimeRequirements(
-            minimum_window_bars=200 * 4 * 60,
+            minimum_window_bars=200 * 4 * 60 + 60,
             decision_interval_bars=24 * 60,
+            decision_phase_bars=60,
         ),
     }
 )
