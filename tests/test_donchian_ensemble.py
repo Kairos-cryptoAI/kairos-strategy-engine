@@ -128,7 +128,7 @@ def test_allocation_registry_uses_exact_generator_and_fails_closed_for_paper():
     registered = generate_target_allocations("donchian_ensemble_long_v1", source, _config())
 
     assert registered == direct
-    assert ALLOCATION_STRATEGIES["donchian_ensemble_long_v1"].status is StrategyStatus.RESEARCH
+    assert ALLOCATION_STRATEGIES["donchian_ensemble_long_v1"].status is StrategyStatus.INCONCLUSIVE
     with pytest.raises(PaperStrategyDisabledError, match="not PAPER-approved"):
         generate_target_allocations("donchian_ensemble_long_v1", source, _config(), for_paper=True)
 

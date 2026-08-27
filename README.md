@@ -24,7 +24,8 @@ and defaults to an empty strategy set. Because no existing sleeve is
 Deploy the consumer with the `runtime` extra; research/backtest installations
 do not pull the persistence or message-bus runtime.
 
-Every currently registered sleeve is either `REJECTED` or pre-gate `RESEARCH`. Calling
+Every currently registered sleeve is `REJECTED`, pre-gate `RESEARCH`, or
+`INCONCLUSIVE` after a consumed evaluation that produced no strategy result. Calling
 `generate_sleeve_intents(..., for_paper=True)` fails closed; this repository
 does not authorize a strategy for PAPER or LIVE trading. Promotion evidence is
 owned by `kairos-backtest`, and a future status change requires a separate,
@@ -42,7 +43,7 @@ reviewed commit after the offline gate passes.
 | `quarter_hour_flow_v1` | `1` | `RESEARCH` |
 | `right_tail_trend_v1` | `1` | `REJECTED` |
 | `crowded_trend_continuation_v1` | `1` | `REJECTED` |
-| `donchian_ensemble_long_v1` | `1` | `RESEARCH` |
+| `donchian_ensemble_long_v1` | `1` | `INCONCLUSIVE` |
 
 `quarter_hour_flow_v1` is a causal one-minute proxy for the first-ten-second
 [quarter-hour order-flow effect documented by Kim and Hansen (2026)](https://arxiv.org/abs/2607.09426).
@@ -82,6 +83,12 @@ exits update immediately. Targets decided at one UTC daily close become
 effective on the next day. The allocation registry is separate from order
 intents because the current PAPER lifecycle cannot yet execute dynamic target
 weights or daily moving stops; `for_paper=True` therefore fails closed.
+Its only preregistered reused-data attempt stopped on a checksum-verified
+official Binance row whose taker-buy volume exceeds total volume. No portfolio
+metric was persisted, so the model is neither accepted nor performance-rejected;
+the attempt remains consumed and the registry records `INCONCLUSIVE`. The exact
+[failure evidence](https://github.com/Kairos-cryptoAI/kairos-backtest/blob/main/reports/donchian-screen/REPORT.md)
+remains fail-closed for PAPER.
 
 The historical module paths in `kairos-backtest` are compatibility façades.
 They re-export these exact modules and classes rather than maintaining copies.

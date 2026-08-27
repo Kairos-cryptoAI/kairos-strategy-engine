@@ -43,6 +43,7 @@ AllocationStrategyGenerator = Callable[[list[Candle], Any], list[TargetAllocatio
 class StrategyStatus(StrEnum):
     """Promotion status; none of the current research sleeves may trade PAPER."""
 
+    INCONCLUSIVE = "inconclusive"
     REJECTED = "rejected"
     RESEARCH = "research"
     PAPER_APPROVED = "paper_approved"
@@ -233,6 +234,7 @@ ALLOCATION_STRATEGIES: Mapping[str, AllocationStrategyDefinition] = MappingProxy
                 "allocation.py",
                 "sleeves/donchian_ensemble.py",
             ),
+            status=StrategyStatus.INCONCLUSIVE,
         )
     }
 )
