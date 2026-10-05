@@ -151,12 +151,19 @@ def test_runtime_shell_publishes_exactly_the_pure_generator_output(monkeypatch):
         return original(strategy_id, history, _range_config(), for_paper=for_paper)
 
     monkeypatch.setattr("kairos_strategy.service.generate_runtime_strategy_intents", configured_generator)
+    monkeypatch.setattr(
+        "kairos_strategy.runtime_evaluation.runtime_configuration", lambda definition: _range_config()
+    )
     emitted = asyncio.run(service.process_bar(bars[-1]))
 
     assert [intent.model_dump(mode="json") for intent in emitted] == [
         intent.model_dump(mode="json") for intent in expected
     ]
-    assert bus.messages == [(Topics.STRATEGY_INTENT, expected[0].to_payload())]
+    assert [message for message in bus.messages if message[0] == Topics.STRATEGY_INTENT] == [
+        (Topics.STRATEGY_INTENT, expected[0].to_payload())
+    ]
+    assert service.last_evaluations[0].status == "INTENT"
+    assert service.last_evaluations[0].intent_ids == (expected[0].intent_id,)
 
 
 def test_empty_strategy_set_consumes_valid_bars_without_emitting_candidates():
@@ -164,7 +171,9 @@ def test_empty_strategy_set_consumes_valid_bars_without_emitting_candidates():
     service = StrategyEngineService(_settings(), bus=bus)
     emitted = asyncio.run(service.process_bar(candle_to_closed_bar(_candles()[0])))
     assert emitted == ()
-    assert bus.messages == []
+    assert [message[0] for message in bus.messages] == [Topics.STRATEGY_EVALUATION]
+    assert service.last_evaluations[0].status == "DISABLED"
+    assert not service.last_evaluations[0].evaluation_complete
 
 
 def test_forward_frozen_strategy_rejects_an_insufficient_runtime_window():

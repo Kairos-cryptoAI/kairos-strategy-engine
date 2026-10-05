@@ -17,12 +17,21 @@ does not depend on a collector or runtime service.
 The service shell is intentionally separate from those pure modules. It reads
 strict `ClosedBarEventV1` messages through the transactional inbox/outbox,
 restores its bounded bar windows from the immutable PostgreSQL audit log, and
-publishes only strict `StrategyIntentV1` messages. A gap, reorder, or conflicting
+publishes strict `StrategyIntentV1` candidates and observational
+`StrategyEvaluationV1` receipts. A gap, reorder, or conflicting
 bar blocks that symbol. PAPER requires Redis/PostgreSQL, rejects LIVE authority,
 and defaults to an empty strategy set. Because no existing sleeve is
 `PAPER_APPROVED`, attempting to enable any of them in PAPER is a startup error.
 Deploy the consumer with the `runtime` extra; research/backtest installations
 do not pull the persistence or message-bus runtime.
+
+The runtime now distinguishes a scheduled completed directional/quiet evaluation
+from warmup, an unscheduled bar, disabled configuration, unavailable readiness
+and an evaluation error. An empty generator result alone is not proof of a
+completed analysis. [Runtime evaluation semantics](docs/RUNTIME-EVALUATIONS.md)
+describe causal references, local clocks, retry identities and the limits of
+this operational evidence. Receipts never select an adaptive hypothesis, supply
+economic qualification or change the existing research/PAPER/LIVE allow-lists.
 
 Every currently registered sleeve is `REJECTED`, pre-gate `RESEARCH`,
 `FORWARD_FROZEN`, or `INCONCLUSIVE` after a consumed evaluation that produced no strategy result. Calling
