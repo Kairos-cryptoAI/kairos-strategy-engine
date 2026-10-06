@@ -42,6 +42,14 @@ reviewed commit after the offline gate passes.
 
 ## Owned generators
 
+The selected new `adaptive_pullback_range_v1` hypothesis is implemented in an
+isolated opt-in namespace, **not** enabled in the legacy registry/service or
+PAPER/LIVE. It uses finite closed 1m/5m/15m/1h rules, trend/range entries and a
+protective crash-retest overlay. Source/config identities, strict observation
+clocks and replay parity are engineering evidence only; no historical net
+performance or own blind campaign is qualified by implementing it.
+[Exact selected rules and boundaries](docs/ADAPTIVE-PULLBACK-RANGE-V1.md).
+
 | Strategy ID | Revision | Status |
 | --- | --- | --- |
 | `trend_breakout_v1` | `1` | `REJECTED` |

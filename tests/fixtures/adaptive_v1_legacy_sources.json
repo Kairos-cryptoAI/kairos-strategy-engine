@@ -1,0 +1,46 @@
+{
+  "crowded_trend_continuation_v1": {
+    "config": "7fedc46246d290786024a4f6bf5d4f255177abc226a9cfe0bb86d9a8da8695b8",
+    "source": "b56de48ef73d0c0070cb0e49b9436ebcd7a9fa5af212ec1109a4fc7531676dbc"
+  },
+  "donchian_ensemble_long_v1": {
+    "config": "168257ef90f3bf7c0c495ddae42df5dfa1254a49445ed961edae36bcdd6f2006",
+    "source": "db0ea1339c1685f841e351f9064aee053dea54acc489e3a6f6badf476be6e74a"
+  },
+  "four_hour_sma200_long_v1": {
+    "config": "dbbcc98d0b8d40df9e0504a1837ab6ca54669559679802fd9291511b1c3e89c5",
+    "source": "dd35c5d6fd4a7b6a3ae19081767e2c64ab9c0307577b3c8b342ae120943a4e98"
+  },
+  "orderflow_volatility_expansion_v1": {
+    "config": "28216bc5cbc80de8af07c1467b3eca27176be36c5d5d60a88be4093c07640118",
+    "source": "0843d1b8fb6da031ad90f32e25bb1c1aeaf60e1b0878347a3ff3c95a6e8db312"
+  },
+  "quarter_hour_flow_v1": {
+    "config": "65a7af7e722b8c7639f5f2fd1aadf1d94e6f1630a1c99e022703554b0bba7691",
+    "source": "2fb38fa83f32fdd828e9d73b1dfbc955aba3ca38e7f4f6506c1e396649ca4171"
+  },
+  "range_mean_reversion_v1": {
+    "config": "703ca9f4fa5c2dbc124b12232ee56a71eaedbf961be509f0c3cd7d55628ba5a5",
+    "source": "3262a4a9ec33ef99df3046497a51b0e9565af495d7554c4058e7cd52a6dd22c0"
+  },
+  "regime_aligned_right_tail_v1": {
+    "config": "ae4ff7d7c54353a544be045903b64d5c0be9d6ca8d22ec6158e4942a36a59efe",
+    "source": "f795c8f01d58666c5f215e5c98eabf7368e25d1ac83ff3bc7ae27332e0966b84"
+  },
+  "regime_veto_retest_reclaim_v1": {
+    "config": "de65e99cb89bd5ef7210abc1c09233c24b935afa80e78c6f71e84a3b2463f6f7",
+    "source": "ab64a2dd1dd7d3baa4c33e2615f826ea248b7e70dfa30db141652598088340e9"
+  },
+  "right_tail_trend_v1": {
+    "config": "c36879cc052ccad8f126be29eb6cc8bd70c8274598e8a98fbae2e3ed69805253",
+    "source": "c548822cbe971e0580c2fa55e0c25fb55b314103f63cff87ab8d8264391a1a64"
+  },
+  "trend_breakout_v1": {
+    "config": "d1ce5f5306e0efab4e5b9f44fd1d691fb5a4ba7d0305b752a8a7100a3da09865",
+    "source": "0334f227fa1fa35111505a9bdd5e00a378f4477a0979b2142d3e4ebda4198f31"
+  },
+  "trend_pullback_reclaim_v1": {
+    "config": "d4f3a3797521aa255bef8de4943d76cd89a8288fea2afd536a9e5039e98494e2",
+    "source": "65fa86a659339fde4f62072fedb6e913a3c075031b8e0360afb6f13dc9a273af"
+  }
+}
