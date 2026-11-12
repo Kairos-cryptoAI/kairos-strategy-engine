@@ -28,7 +28,7 @@ from kairos_core.enums import Side
 
 from ..candles import Candle
 from ..models import ExitPlan, SleeveIntent
-from ..timeframes import build_timeframes
+from ..timeframes import aggregate
 
 _QUARTER_MS = 15 * 60 * 1_000
 _HOUR_MS = 60 * 60 * 1_000
@@ -493,7 +493,7 @@ def generate_hourly_trend_candidates_intents(
     """Emit an intent at every closed quarter hour whose hourly bar meets the rules."""
 
     settings = _settings(config)
-    quarters = build_timeframes(candles_1m)["15m"]
+    quarters = aggregate(candles_1m, "15m")
     if not quarters:
         return []
     phases = _phases(quarters)
@@ -518,7 +518,7 @@ def evaluate_hourly_trend_state(
     """
 
     settings = _settings(config)
-    quarters = build_timeframes(candles_1m)["15m"]
+    quarters = aggregate(candles_1m, "15m")
     if not quarters:
         return None, None
     newest = quarters[-1]
