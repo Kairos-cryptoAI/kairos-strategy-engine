@@ -50,6 +50,14 @@ clocks and replay parity are engineering evidence only; no historical net
 performance or own blind campaign is qualified by implementing it.
 [Exact selected rules and boundaries](docs/ADAPTIVE-PULLBACK-RANGE-V1.md).
 
+`hourly_trend_candidates_v1` (`kairos_strategy.hourly_trend`) is the rule set the live
+runner (`kairos-autotrader`) trades on EVEDEX, ported unchanged so that research and
+runtime share one implementation. It is isolated in the same way: **not** in the legacy
+registry/service, with its own source identity, so the existing fingerprints are
+untouched. Parity with the runner's original code is fixture-tested. It carries no
+promotion: the unfiltered candidates averaged about -0.08 R after costs on EVEDEX minute
+history. [Rules and boundaries](docs/HOURLY-TREND-CANDIDATES-V1.md).
+
 | Strategy ID | Revision | Status |
 | --- | --- | --- |
 | `trend_breakout_v1` | `1` | `REJECTED` |
