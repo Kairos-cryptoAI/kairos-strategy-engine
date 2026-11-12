@@ -303,7 +303,9 @@ def test_identity_is_separate_from_the_legacy_registry():
     assert (
         hourly_trend_source_identity(replace(HourlyTrendCandidatesConfig(), max_hold_minutes=60)) != identity
     )
-    assert "registry.py" not in HOURLY_TREND_SOURCE_FILES
+    # The strict adapter shares runtime.py, which imports the registry module; none of the
+    # legacy sleeves that module lists belongs to this package's source closure.
+    assert not any(name.startswith("sleeves/") for name in HOURLY_TREND_SOURCE_FILES)
 
     with pytest.raises(KeyError, match="unknown strategy_id: hourly_trend_candidates_v1"):
         get_strategy(STRATEGY_ID)

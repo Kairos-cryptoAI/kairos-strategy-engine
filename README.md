@@ -54,7 +54,9 @@ performance or own blind campaign is qualified by implementing it.
 runner (`kairos-autotrader`) trades on EVEDEX, ported unchanged so that research and
 runtime share one implementation. It is isolated in the same way: **not** in the legacy
 registry/service, with its own source identity, so the existing fingerprints are
-untouched. Parity with the runner's original code is fixture-tested. It carries no
+untouched. Parity with the runner's original code is fixture-tested, and
+`evaluate_hourly_trend_closed_bars` turns a gap-free `ClosedBarEventV1` stream into a
+strict `StrategyIntentV1` through the shared runtime conversion. It carries no
 promotion: the unfiltered candidates averaged about -0.08 R after costs on EVEDEX minute
 history. [Rules and boundaries](docs/HOURLY-TREND-CANDIDATES-V1.md).
 

@@ -18,7 +18,9 @@ the legacy registry, the durable consumer or the runtime requirements. `registry
 part of every registered strategy's source fingerprint, so registering here would change
 the eleven existing source identities, Trial 15 included. They stay intact
 (`tests/test_adaptive_lineage.py`). The package has its own identity,
-`hourly_trend_source_identity()`, over its finite source closure.
+`hourly_trend_source_identity()`, over its finite source closure: its own files, the
+shared `runtime.py` conversion and the `registry.py` module that conversion imports, as
+reviewed for `kairos_strategy.adaptive`. No legacy sleeve file belongs to it.
 
 Registering it for the service or a campaign is a separate, source-pinned step.
 
@@ -56,12 +58,26 @@ registered sleeves and is kept for parity with the traded behaviour.
 - `evaluate_hourly_trend_state(candles_1m, config=None)` returns the state the rules saw
   at the newest decision, and the intent if there is one. The state is reviewer evidence
   and has no authority.
+- `evaluate_hourly_trend_closed_bars(bars, config=None)` is the strict adapter: one
+  symbol's gap-free `ClosedBarEventV1` stream that ends at a quarter-hour close in, the
+  state and at most one `StrategyIntentV1` out, through the same `_strict_intent`
+  conversion as the registered sleeves. A gap, a duplicate, mixed symbols or a stream
+  that does not end at a quarter hour raises. The declared input is exactly the window
+  the rules read, `history_hours` back from the decision.
+
+A strict intent of the default configuration declares 30 240 input bar hashes and is
+about 2 MB of JSON. `DecisionContextV1` carries the intent identity whole, so a consumer
+that renders the context into a model prompt has to bound that list itself; this package
+does not shorten the declaration.
 
 ## Evidence so far
 
 - Parity: on identical input the package reproduces the runner's candidates and features
   (`tests/test_hourly_trend_candidates.py`, frozen fixture of 169 candidates and 1525
   evaluated decisions produced by the runner's original code).
+- Strict adapter: on a gap-free deterministic series every strict intent equals the
+  rule candidate field for field, its provenance lists exactly the bars of the window,
+  and it validates as the intent of a `CandidateRouteV1` (`tests/test_hourly_trend_adapter.py`).
 - EVEDEX minute history, 2026-10-07..2026-11-12, ten instruments, round-trip cost 0.13%:
   2009 unfiltered candidates, mean -0.077 R, standard error 0.025 before allowing for
   dependence between neighbouring decisions and instruments.

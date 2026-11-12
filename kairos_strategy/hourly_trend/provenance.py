@@ -7,14 +7,19 @@ from dataclasses import dataclass
 from ..provenance import config_sha256, installed_source_tree_sha256
 from .rules import STRATEGY_ID, STRATEGY_REVISION, HourlyTrendCandidatesConfig
 
-# The finite source closure of the rules: their own files and every package file they import.
+# The finite source closure of the rules and of their strict adapter, as reviewed for
+# kairos_strategy.adaptive: the package's own files, the shared runtime conversion and the
+# registry module it imports. The legacy sleeves the registry lists are not part of it.
 HOURLY_TREND_SOURCE_FILES = (
     "candles.py",
     "hourly_trend/__init__.py",
+    "hourly_trend/adapter.py",
     "hourly_trend/provenance.py",
     "hourly_trend/rules.py",
     "models.py",
     "provenance.py",
+    "registry.py",
+    "runtime.py",
     "timeframes.py",
     "validation.py",
 )
