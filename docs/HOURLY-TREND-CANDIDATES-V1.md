@@ -65,6 +65,13 @@ registered sleeves and is kept for parity with the traded behaviour.
 - EVEDEX minute history, 2026-10-07..2026-11-12, ten instruments, round-trip cost 0.13%:
   2009 unfiltered candidates, mean -0.077 R, standard error 0.025 before allowing for
   dependence between neighbouring decisions and instruments.
+- Signal computed on Binance USD-M one-minute bars (public REST klines, not the
+  checksum-verified archives), outcome judged on EVEDEX minute bars with levels moved by
+  the price ratio of the two venues, 2026-10-07..2026-11-12, the same ten instruments and
+  cost: 2167 candidates, mean -0.049 R, standard error 0.024. With the signal on EVEDEX
+  bars over the same period: 2142 candidates, mean -0.080 R, standard error 0.024. 93% of
+  the candidates are the same decisions; the difference is inside the noise. The median
+  price difference between the venues was about -1 bp.
 - One live trade. No statement about an edge follows from it.
 
 ## Boundaries
