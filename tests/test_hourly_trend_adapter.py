@@ -212,3 +212,41 @@ def test_ambiguous_input_raises_instead_of_deciding():
 def test_source_closure_covers_the_adapter_and_the_shared_conversion():
     assert {"hourly_trend/adapter.py", "runtime.py", "registry.py"} <= set(HOURLY_TREND_SOURCE_FILES)
     assert tuple(sorted(HOURLY_TREND_SOURCE_FILES)) == HOURLY_TREND_SOURCE_FILES
+
+
+@pytest.mark.parametrize("tick", ["0.01", "0.5", "7"])
+def test_venue_tick_puts_both_barriers_on_the_grid_toward_the_reference(tick):
+    from decimal import Decimal
+
+    from kairos_core.enums import Side
+
+    increment = Decimal(tick)
+    raw = _rule_intents()[-1]
+    evaluation = evaluate_hourly_trend_closed_bars(_bars_until(raw.decision_ts_ms), price_increment=increment)
+    intent = evaluation.intent
+    if intent is None:  # a coarse grid may leave no room between the barriers
+        return
+    stop, target = Decimal(repr(intent.exit_plan.stop_price)), Decimal(repr(intent.exit_plan.target_price))
+    reference = Decimal(repr(intent.reference_price))
+    assert stop % increment == 0 and target % increment == 0
+    raw_stop, raw_target = Decimal(repr(raw.exit_plan.stop_price)), Decimal(repr(raw.exit_plan.target_price))
+    if intent.side is Side.LONG:
+        assert raw_stop <= stop < reference < target <= raw_target
+    else:
+        assert raw_target <= target < reference < stop <= raw_stop
+    assert abs(stop - raw_stop) < increment and abs(target - raw_target) < increment
+    assert dict(intent.metadata)["venue_price_increment"] == tick
+    assert intent.gross_reward_bps == float(abs(target - reference) / reference * 10_000)
+    assert StrategyIntentV1.model_validate(intent.model_dump(mode="json")) == intent
+
+
+def test_venue_tick_drops_a_candidate_whose_barrier_reaches_the_reference():
+    from decimal import Decimal
+
+    from kairos_strategy.hourly_trend import on_venue_tick
+
+    raw = _rule_intents()[-1]
+    huge = Decimal(int(raw.reference_price * 10))
+    assert on_venue_tick(raw, huge) is None
+    with pytest.raises(ValueError, match="positive"):
+        on_venue_tick(raw, Decimal(0))

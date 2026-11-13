@@ -1,6 +1,6 @@
 """The live runner's rules, isolated; legacy registries and frozen source files are untouched."""
 
-from .adapter import HourlyTrendEvaluation, evaluate_hourly_trend_closed_bars
+from .adapter import HourlyTrendEvaluation, evaluate_hourly_trend_closed_bars, on_venue_tick
 from .provenance import HourlyTrendSourceIdentity, hourly_trend_source_identity
 from .rules import (
     SETUP_BREAKOUT,
@@ -23,6 +23,7 @@ __all__ = [
     "HourlyTrendSourceIdentity",
     "HourlyTrendState",
     "evaluate_hourly_trend_closed_bars",
+    "on_venue_tick",
     "evaluate_hourly_trend_state",
     "generate_hourly_trend_candidates_intents",
     "hourly_trend_source_identity",
